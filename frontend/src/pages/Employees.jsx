@@ -160,7 +160,7 @@ const Employees = () => {
                                             </span>
                                         </td>
                                         <td style={{ padding: '1.5rem' }}>{e.phoneno}</td>
-                                        <td style={{ padding: '1.5rem' }}>${e.salary}</td>
+                                        <td style={{ padding: '1.5rem' }}>₹{e.salary}</td>
                                         <td style={{ padding: '1.5rem', textAlign: 'right', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                                             <button onClick={() => openAttendance(e)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', padding: '0.5rem', borderRadius: '0.5rem', background: 'rgba(139, 92, 246, 0.1)' }}>
                                                 <Clock size={16} /> Status

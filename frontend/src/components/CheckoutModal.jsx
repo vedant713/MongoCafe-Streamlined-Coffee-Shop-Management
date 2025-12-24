@@ -89,21 +89,21 @@ const CheckoutModal = ({ cart, total, onClose, onOrderComplete }) => {
                     {cart.map((item, idx) => (
                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                             <span>{item.name} x {item.quantity}</span>
-                            <span>${item.price * item.quantity}</span>
+                            <span>₹{item.price * item.quantity}</span>
                         </div>
                     ))}
                     <hr style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '1rem 0' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                         <span>Subtotal</span>
-                        <span>${subtotal}</span>
+                        <span>₹{subtotal}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                         <span>Tax (5% GST)</span>
-                        <span>${tax}</span>
+                        <span>₹{tax}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--primary)', marginTop: '0.5rem' }}>
                         <span>Grand Total</span>
-                        <span>${grandTotal}</span>
+                        <span>₹{grandTotal}</span>
                     </div>
                 </div>
 
@@ -149,7 +149,7 @@ const CheckoutModal = ({ cart, total, onClose, onOrderComplete }) => {
                                 marginBottom: '1rem', textAlign: 'center',
                                 color: getSplitTotal() === grandTotal ? 'var(--success)' : '#ff6b6b'
                             }}>
-                                Remaining: ${grandTotal - getSplitTotal()}
+                                Remaining: ₹{grandTotal - getSplitTotal()}
                             </div>
                             {['Cash', 'Card', 'UPI'].map(m => (
                                 <div key={m} style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
@@ -171,7 +171,7 @@ const CheckoutModal = ({ cart, total, onClose, onOrderComplete }) => {
                     className="btn-primary"
                     style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
                 >
-                    Confirm & Pay ${grandTotal}
+                    Confirm & Pay ₹{grandTotal}
                 </button>
             </div>
         </div>

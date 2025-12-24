@@ -97,47 +97,38 @@ async def login_staff_pin(request: StaffPinRequest):
 
 # --- CUSTOMER Endpoints ---
 
-@router.post("/auth/customer/send-otp")
-async def send_otp(request: CustomerOtpRequest):
-    # Mock OTP - in real world integ w/ Twilio/SNS
-    # Create customer if not exists or just ensuring existence?
-    # Usually we create on verify.
-    print(f"DEBUG: OTP '1234' sent to {request.phone}")
-    return {"status": "success", "message": "OTP sent", "debug_otp": "1234"}
+class GuestLoginRequest(BaseModel):
+    name: str = "Guest"
 
-@router.post("/auth/customer/verify-otp", response_model=Token)
-async def verify_otp(request: CustomerVerifyRequest):
-    if request.otp != "1234":
-         raise HTTPException(status_code=401, detail="Invalid OTP")
-         
-    customers_collection = db.get_collection("customers")
-    customer = customers_collection.find_one({"phone": request.phone})
+@router.post("/auth/customer/login-guest", response_model=Token)
+async def login_guest(request: GuestLoginRequest):
+    # Direct access, no OTP
+    # Create a temporary customer record or find based on name if we wanted logic, 
+    # but for Guest access we just create a session.
     
-    if not customer:
-        # Register new
-        new_customer = {
-            "phone": request.phone,
-            "created_at": str(datetime.now())
-        }
-        res = customers_collection.insert_one(new_customer)
-        customer_id = str(res.inserted_id)
-        name = f"Customer-{request.phone[-4:]}"
-    else:
-        customer_id = str(customer["_id"])
-        name = customer.get("name", f"Customer-{request.phone[-4:]}")
-        
+    customers_collection = db.get_collection("customers")
+    
+    # Optional: Track guests
+    new_customer = {
+        "name": request.name,
+        "type": "guest",
+        "created_at": str(datetime.now())
+    }
+    res = customers_collection.insert_one(new_customer)
+    customer_id = str(res.inserted_id)
+    
     access_token = create_access_token(
-        data={"sub": name, "role": ROLE_CUSTOMER, "user_id": customer_id},
-        expires_delta=timedelta(days=7) # Customers stay logged in longer
+        data={"sub": request.name, "role": ROLE_CUSTOMER, "user_id": customer_id},
+        expires_delta=timedelta(days=1) 
     )
     
-    log_action(customer_id, ROLE_CUSTOMER, "login:otp", "system")
+    log_action(customer_id, ROLE_CUSTOMER, "login:guest", "system")
 
     return {
         "access_token": access_token, 
         "token_type": "bearer",
         "role": ROLE_CUSTOMER,
-        "username": name
+        "username": request.name
     }
 
 # --- UTILITY ---

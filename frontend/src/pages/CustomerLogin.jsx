@@ -1,86 +1,110 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Smartphone, ArrowRight, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Coffee, ArrowRight, User } from 'lucide-react';
 
 const CustomerLogin = () => {
-    const [phoneno, setPhoneno] = useState('');
-    const [otp, setOtp] = useState('');
-    const [step, setStep] = useState(1); // 1: Phone, 2: OTP
-    const { loginCustomer } = useAuth();
+    const [name, setName] = useState('');
+    const { loginGuest } = useAuth();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
-    const handleSendOtp = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        if (phoneno.length < 10) return alert("Enter valid phone number");
-        setStep(2);
-        // Simulate sending OTP
-        console.log("OTP Sent: 123456");
-    };
-
-    const handleVerify = async (e) => {
-        e.preventDefault();
-        const res = await loginCustomer(phoneno, otp);
+        setLoading(true);
+        const res = await loginGuest(name);
         if (res.success) {
             navigate('/menu');
         } else {
-            alert(res.message);
+            alert("Something went wrong. Please try again.");
         }
+        setLoading(false);
     };
 
     return (
-        <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#0f172a' }}>
-            <div className="glass" style={{ width: '100%', maxWidth: '380px', padding: '2rem', borderRadius: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem', textAlign: 'center' }}>
-                    {step === 1 ? 'Start Ordering' : 'Verify Mobile'}
-                </h2>
-                <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-                    {step === 1 ? 'Enter your mobile number to continue' : `OTP sent to ${phoneno}`}
-                </p>
+        <div style={{
+            height: '100vh',
+            width: '100vw',
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: "'Inter', sans-serif"
+        }}>
+            <div style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px)',
+                padding: '3rem',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                width: '100%',
+                maxWidth: '400px',
+                textAlign: 'center',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
+            }}>
+                <div style={{
+                    width: '70px',
+                    height: '70px',
+                    background: 'linear-gradient(135deg, #00b4db 0%, #0083b0 100%)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 1.5rem',
+                    boxShadow: '0 10px 20px rgba(0,180,219,0.3)'
+                }}>
+                    <Coffee size={32} color="white" />
+                </div>
 
-                {step === 1 ? (
-                    <form onSubmit={handleSendOtp}>
-                        <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-                            <Smartphone size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                            <input
-                                type="tel" placeholder="Mobile Number" value={phoneno}
-                                onChange={e => setPhoneno(e.target.value)}
-                                style={{ width: '100%', padding: '1rem 1rem 1rem 3rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', fontSize: '1rem' }}
-                                required
-                            />
-                        </div>
-                        <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', borderRadius: '0.8rem', fontSize: '1rem' }}>
-                            Send OTP
-                        </button>
-                    </form>
-                ) : (
-                    <form onSubmit={handleVerify}>
-                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
-                            {[...Array(6)].map((_, i) => (
-                                <input
-                                    key={i} type="text" maxLength="1"
-                                    style={{ width: '40px', height: '50px', textAlign: 'center', fontSize: '1.2rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
-                                    value={otp[i] || ''}
-                                    onChange={e => {
-                                        const val = e.target.value;
-                                        setOtp(prev => {
-                                            const arr = prev.split('');
-                                            arr[i] = val;
-                                            return arr.join('');
-                                        });
-                                        if (val && e.target.nextSibling) e.target.nextSibling.focus();
-                                    }}
-                                />
-                            ))}
-                        </div>
-                        <div style={{ textAlign: 'center', marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                            Use simplistic OTP: <b>123456</b>
-                        </div>
-                        <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', borderRadius: '0.8rem', fontSize: '1rem' }}>
-                            Verify & Continue
-                        </button>
-                    </form>
-                )}
+                <h2 style={{ color: 'white', marginBottom: '0.5rem', fontSize: '1.8rem' }}>Welcome!</h2>
+                <p style={{ color: '#8b9bb4', marginBottom: '2rem' }}>Enter your name to start ordering.</p>
+
+                <form onSubmit={handleLogin}>
+                    <div style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                        <User size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#6e7a91' }} />
+                        <input
+                            type="text"
+                            placeholder="Your Name (Optional)"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '1rem 1rem 1rem 3rem',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '10px',
+                                color: 'white',
+                                fontSize: '1rem',
+                                outline: 'none'
+                            }}
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        style={{
+                            width: '100%',
+                            padding: '1rem',
+                            background: 'linear-gradient(90deg, #00b4db 0%, #0083b0 100%)',
+                            border: 'none',
+                            borderRadius: '10px',
+                            color: 'white',
+                            fontSize: '1rem',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            transition: 'transform 0.2s',
+                            opacity: loading ? 0.7 : 1
+                        }}
+                    >
+                        {loading ? 'Starting...' : 'Start Ordering'}
+                        {!loading && <ArrowRight size={18} />}
+                    </button>
+                </form>
             </div>
         </div>
     );

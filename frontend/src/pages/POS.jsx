@@ -135,7 +135,7 @@ const POS = () => {
                             </div>
                             <div style={{ padding: '0.8rem', textAlign: 'center' }}>
                                 <div style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.2rem' }}>{p.name}</div>
-                                <div style={{ color: 'var(--primary)', fontWeight: 'bold' }}>${p.price}</div>
+                                <div style={{ color: 'var(--primary)', fontWeight: 'bold' }}>₹{p.price}</div>
                             </div>
                         </div>
                     ))}
@@ -173,7 +173,7 @@ const POS = () => {
                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'rgba(255,255,255,0.02)', padding: '0.8rem', borderRadius: '0.8rem' }}>
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>${item.price} x {item.quantity}</div>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>₹{item.price} x {item.quantity}</div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <button onClick={() => updateQuantity(item.name, -1)} style={{ padding: '0.2rem', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', cursor: 'pointer' }}><Minus size={14} /></button>
@@ -189,7 +189,7 @@ const POS = () => {
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '1.2rem', fontWeight: 'bold' }}>
                         <span>Subtotal</span>
-                        <span>${calculateTotal()}</span>
+                        <span>₹{calculateTotal()}</span>
                     </div>
 
                     <button

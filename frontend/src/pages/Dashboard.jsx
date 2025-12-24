@@ -79,7 +79,7 @@ const Dashboard = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
                 <StatsCard
                     title="Total Sales"
-                    value={`$${stats.total_sales}`}
+                    value={`₹${stats.total_sales}`}
                     icon={<DollarSign size={24} />}
                     color="#22c55e"
                 />

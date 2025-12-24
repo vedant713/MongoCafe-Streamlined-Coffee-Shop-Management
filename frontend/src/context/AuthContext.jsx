@@ -38,13 +38,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const loginCustomer = async (phoneno, otp) => {
+    const loginGuest = async (name) => {
         try {
-            // Backend expects 'phone' not 'phoneno'
-            const res = await axios.post('http://localhost:8000/api/auth/customer/verify-otp', { phone: phoneno, otp });
+            const res = await axios.post('http://localhost:8000/api/auth/customer/login-guest', { name: name || "Guest" });
             return processLogin(res.data);
         } catch (err) {
-            return { success: false, message: err.response?.data?.detail || 'OTP Verify failed' };
+            return { success: false, message: err.response?.data?.detail || 'Guest Login failed' };
         }
     };
 
@@ -66,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, loginWithPin, loginCustomer, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, loginWithPin, loginGuest, logout, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

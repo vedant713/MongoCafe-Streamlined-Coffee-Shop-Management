@@ -187,7 +187,7 @@ const Menu = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>${p.price}</span>
+                                        <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>₹{p.price}</span>
                                         <button
                                             onClick={() => {
                                                 setEditingId(p._id);
