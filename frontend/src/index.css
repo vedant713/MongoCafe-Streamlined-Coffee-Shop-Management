@@ -1,4 +1,8 @@
 :root {
+  --font-family: 'Outfit', sans-serif;
+}
+
+:root.dark {
   --primary: #6d28d9;
   --primary-hover: #5b21b6;
   --background: #0f172a;
@@ -8,7 +12,18 @@
   --accent: #ec4899;
   --success: #22c55e;
   --error: #ef4444;
-  --font-family: 'Outfit', sans-serif;
+}
+
+:root.light {
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --text-secondary: #64748b;
+  --accent: #db2777;
+  --success: #16a34a;
+  --error: #dc2626;
 }
 
 body {

@@ -1,17 +1,11 @@
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DollarSign, ShoppingBag, Users, ArrowRight } from 'lucide-react';
-
-const StatCard = ({ title, value, icon, color }) => (
-    <div className="glass" style={{ padding: '1.5rem', borderRadius: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'transform 0.2s', cursor: 'default' }}>
-        <div style={{ background: `rgba(${color}, 0.2)`, padding: '0.75rem', borderRadius: '0.75rem', color: `rgb(${color})` }}>
-            {icon}
-        </div>
-        <div>
-            <h4 style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{title}</h4>
-            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>{value}</p>
-        </div>
-    </div>
-);
+import axios from 'axios';
+import StatsCard from '../components/StatsCard';
+import SalesChart from '../components/SalesChart';
+import PopularItemsChart from '../components/PopularItemsChart';
+import { playNotificationSound } from '../utils/sound';
 
 const QuickAction = ({ title, to, color }) => {
     const navigate = useNavigate();
@@ -22,8 +16,9 @@ const QuickAction = ({ title, to, color }) => {
             style={{
                 width: '100%', padding: '1.5rem', borderRadius: '1rem',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-                border: `1px solid rgba(${color}, 0.2)`,
-                textAlign: 'center', transition: 'all 0.2s'
+                border: `1px solid ${color}33`, // 20% opacity approx
+                textAlign: 'center', transition: 'all 0.2s',
+                color: 'var(--text)'
             }}
         >
             <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{title}</h3>
@@ -35,6 +30,44 @@ const QuickAction = ({ title, to, color }) => {
 };
 
 const Dashboard = () => {
+    const [stats, setStats] = useState({ total_sales: 0, total_orders: 0 });
+    const [peakHours, setPeakHours] = useState([]);
+    const [popularItems, setPopularItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const prevOrdersRef = useRef(0);
+
+    const fetchData = async () => {
+        try {
+            const [summaryRes, peakRes, popularRes] = await Promise.all([
+                axios.get('http://localhost:8000/api/analytics/summary'),
+                axios.get('http://localhost:8000/api/analytics/peak-hours'),
+                axios.get('http://localhost:8000/api/analytics/popular-items')
+            ]);
+
+            const newStats = summaryRes.data;
+            setStats(newStats);
+            setPeakHours(peakRes.data);
+            setPopularItems(popularRes.data);
+
+            // Check for new orders
+            if (prevOrdersRef.current > 0 && newStats.total_orders > prevOrdersRef.current) {
+                playNotificationSound();
+            }
+            prevOrdersRef.current = newStats.total_orders;
+
+        } catch (error) {
+            console.error("Failed to fetch analytics", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+        const interval = setInterval(fetchData, 10000); // Poll every 10s
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <div>
             <div style={{ marginBottom: '2rem' }}>
@@ -44,32 +77,39 @@ const Dashboard = () => {
 
             {/* Stats Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                <StatCard
+                <StatsCard
                     title="Total Sales"
-                    value="$12,450"
+                    value={`$${stats.total_sales}`}
                     icon={<DollarSign size={24} />}
-                    color="34, 197, 94" // Green
+                    color="#22c55e"
                 />
-                <StatCard
+                <StatsCard
                     title="Total Orders"
-                    value="1,245"
+                    value={stats.total_orders}
                     icon={<ShoppingBag size={24} />}
-                    color="236, 72, 153" // Pink
+                    color="#ec4899"
                 />
-                <StatCard
-                    title="Active Employees"
-                    value="8"
+                <StatsCard
+                    title="System Status"
+                    value="Online"
                     icon={<Users size={24} />}
-                    color="59, 130, 246" // Blue
+                    color="#3b82f6"
                 />
+            </div>
+
+            {/* Charts Section */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+                <SalesChart data={peakHours} />
+                <PopularItemsChart data={popularItems} />
             </div>
 
             {/* Quick Actions */}
             <h3 style={{ marginBottom: '1.5rem' }}>Quick Actions</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                <QuickAction title="Manage Customers" to="/customers" color="147, 51, 234" />
-                <QuickAction title="Update Menu" to="/menu" color="234, 179, 8" />
-                <QuickAction title="Manage Staff" to="/employees" color="59, 130, 246" />
+                <QuickAction title="Manage Customers" to="/customers" color="#9333ea" />
+                <QuickAction title="Update Menu" to="/menu" color="#eab308" />
+                <QuickAction title="Manage Staff" to="/employees" color="#3b82f6" />
+                <QuickAction title="Inventory" to="/inventory" color="#f97316" />
             </div>
         </div>
     );

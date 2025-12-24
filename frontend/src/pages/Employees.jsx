@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Search, Trash2, UserCog, Briefcase } from 'lucide-react';
+import { Plus, Search, Trash2, UserCog, Briefcase, Clock, Calendar } from 'lucide-react';
 import Modal from '../components/Modal';
 
 const Employees = () => {
@@ -8,8 +8,14 @@ const Employees = () => {
     const [filteredEmployees, setFilteredEmployees] = useState([]);
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
     const [formData, setFormData] = useState({ name: '', age: '', phoneno: '', salary: '', email: '', category: 'Barista' });
     const [loading, setLoading] = useState(true);
+
+    // Attendance State
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [attendanceStatus, setAttendanceStatus] = useState("Loading...");
+    const [attendanceHistory, setAttendanceHistory] = useState([]);
 
     useEffect(() => {
         fetchEmployees();
@@ -58,6 +64,40 @@ const Employees = () => {
         }
     };
 
+    // Attendance Functions
+    const openAttendance = async (employee) => {
+        setSelectedEmployee(employee);
+        setIsAttendanceModalOpen(true);
+        fetchAttendanceData(employee.phoneno);
+    };
+
+    const fetchAttendanceData = async (phoneno) => {
+        try {
+            const statusRes = await axios.get(`http://localhost:8000/api/employees/attendance/status/${phoneno}`);
+            setAttendanceStatus(statusRes.data.status);
+
+            const historyRes = await axios.get(`http://localhost:8000/api/employees/attendance/${phoneno}`);
+            setAttendanceHistory(historyRes.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleCheckInOut = async () => {
+        if (!selectedEmployee) return;
+        const type = attendanceStatus === "Checked-in" ? "Check-out" : "Check-in";
+        try {
+            await axios.post('http://localhost:8000/api/employees/attendance', {
+                phoneno: selectedEmployee.phoneno,
+                type: type,
+                timestamp: new Date().toISOString() // Placeholder, backend overrides
+            });
+            fetchAttendanceData(selectedEmployee.phoneno);
+        } catch (err) {
+            alert("Error recording attendance");
+        }
+    };
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -98,7 +138,7 @@ const Employees = () => {
                             <th style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Role</th>
                             <th style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Phone</th>
                             <th style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Salary</th>
-                            <th style={{ padding: '1.5rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Action</th>
+                            <th style={{ padding: '1.5rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,7 +161,10 @@ const Employees = () => {
                                         </td>
                                         <td style={{ padding: '1.5rem' }}>{e.phoneno}</td>
                                         <td style={{ padding: '1.5rem' }}>${e.salary}</td>
-                                        <td style={{ padding: '1.5rem', textAlign: 'right' }}>
+                                        <td style={{ padding: '1.5rem', textAlign: 'right', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                            <button onClick={() => openAttendance(e)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', padding: '0.5rem', borderRadius: '0.5rem', background: 'rgba(139, 92, 246, 0.1)' }}>
+                                                <Clock size={16} /> Status
+                                            </button>
                                             <button onClick={() => handleDelete(e.phoneno)} style={{ color: 'var(--error)', padding: '0.5rem', borderRadius: '0.5rem', background: 'rgba(239, 68, 68, 0.1)' }}>
                                                 <Trash2 size={18} />
                                             </button>
@@ -132,7 +175,7 @@ const Employees = () => {
                 </table>
             </div>
 
-            {/* Add Modal */}
+            {/* Add Employee Modal */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Employee">
                 <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
                     <div style={{ marginBottom: '1rem' }}>
@@ -171,6 +214,45 @@ const Employees = () => {
                     </div>
                     <button type="submit" style={{ width: '100%', padding: '1rem', background: 'var(--primary)', color: 'white', borderRadius: '0.5rem', fontWeight: 'bold', marginTop: '1rem' }}>Save Employee</button>
                 </form>
+            </Modal>
+
+            {/* Attendance Modal */}
+            <Modal isOpen={isAttendanceModalOpen} onClose={() => setIsAttendanceModalOpen(false)} title={`Attendance: ${selectedEmployee?.name}`}>
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <div style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
+                        Current Status: <span style={{ fontWeight: 'bold', color: attendanceStatus === 'Checked-in' ? 'var(--success)' : 'var(--text-secondary)' }}>{attendanceStatus}</span>
+                    </div>
+                    <button
+                        onClick={handleCheckInOut}
+                        style={{
+                            background: attendanceStatus === 'Checked-in' ? 'var(--error)' : 'var(--success)',
+                            color: 'white', padding: '1rem 3rem', borderRadius: '2rem',
+                            fontSize: '1.2rem', fontWeight: 'bold', border: 'none', cursor: 'pointer'
+                        }}
+                    >
+                        {attendanceStatus === 'Checked-in' ? 'Check Out' : 'Check In'}
+                    </button>
+                </div>
+
+                <h3 style={{ borderBottom: '1px solid var(--surface)', paddingBottom: '0.5rem', marginBottom: '1rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>Recent History</h3>
+                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                    <table style={{ width: '100%', fontSize: '0.9rem' }}>
+                        <tbody>
+                            {attendanceHistory.length === 0 ? <tr><td style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>No history found</td></tr> :
+                                attendanceHistory.map((log, idx) => (
+                                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '0.75rem 0', color: log.type === 'Check-in' ? 'var(--success)' : 'var(--error)' }}>
+                                            {log.type}
+                                        </td>
+                                        <td style={{ padding: '0.75rem 0', textAlign: 'right', color: 'var(--text-secondary)' }}>
+                                            {new Date(log.timestamp).toLocaleString()}
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </Modal>
         </div>
     );

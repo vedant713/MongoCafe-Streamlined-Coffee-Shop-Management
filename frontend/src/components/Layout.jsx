@@ -1,15 +1,19 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, UserCog, Coffee } from 'lucide-react';
+import { LayoutDashboard, Users, UserCog, Coffee, ShoppingCart, Package, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const Layout = () => {
     const location = useLocation();
+    const { theme, toggleTheme } = useTheme();
     const isActive = (path) => location.pathname === path;
 
     const navItems = [
         { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+        { path: '/pos', label: 'POS', icon: <ShoppingCart size={20} /> },
+        { path: '/menu', label: 'Menu', icon: <Coffee size={20} /> },
         { path: '/customers', label: 'Customers', icon: <Users size={20} /> },
         { path: '/employees', label: 'Employees', icon: <UserCog size={20} /> },
-        { path: '/menu', label: 'Menu', icon: <Coffee size={20} /> },
+        { path: '/inventory', label: 'Inventory', icon: <Package size={20} /> },
     ];
 
     return (
@@ -39,6 +43,20 @@ const Layout = () => {
                             {item.label}
                         </Link>
                     ))}
+                    <button
+                        onClick={toggleTheme}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--text)',
+                            padding: '0.5rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
                 </div>
             </nav>
             <main>

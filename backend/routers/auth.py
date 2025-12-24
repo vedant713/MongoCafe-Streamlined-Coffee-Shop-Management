@@ -1,31 +1,43 @@
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from backend.database import Database
+from backend.security import verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from datetime import timedelta
 
 router = APIRouter()
 db = Database()
 
 class LoginRequest(BaseModel):
-    user_id: str
+    username: str
     password: str
 
-@router.post("/login")
-def login(request: LoginRequest):
-    # Determine collection based on some logic or try both?
-    # The original app has 'manager' login and 'owner' login.
-    # We'll check 'login' collection (manager) and 'owner' collection.
-    
-    login_collection = db.get_collection("login")
-    owner_collection = db.get_collection("owner")
-    
-    # Check Manager
-    manager = login_collection.find_one({"userid": request.user_id, "password": request.password})
-    if manager:
-        return {"status": "success", "role": "manager", "message": "Login successful"}
-        
-    # Check Owner
-    owner = owner_collection.find_one({"userid": request.user_id, "password": request.password})
-    if owner:
-        return {"status": "success", "role": "owner", "message": "Login successful"}
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    role: str
+    username: str
 
-    raise HTTPException(status_code=401, detail="Invalid credentials")
+@router.post("/login", response_model=Token)
+async def login_for_access_token(request: LoginRequest):
+    users_collection = db.get_collection("users")
+    user = users_collection.find_one({"username": request.username})
+    
+    if not user or not verify_password(request.password, user["password"]):
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["username"], "role": user["role"]},
+        expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "role": user["role"],
+        "username": user["username"]
+    }

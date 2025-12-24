@@ -1,11 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
+from datetime import datetime
 from backend.database import Database
 
 router = APIRouter()
 db = Database()
 employees_collection = db.get_collection("employee")
+attendance_collection = db.get_collection("attendance")
 
 class EmployeeModel(BaseModel):
     name: str
@@ -26,6 +28,11 @@ class EmployeeModel(BaseModel):
                 "category": "Barista"
             }
         }
+
+class AttendanceLog(BaseModel):
+    phoneno: str
+    type: str # "Check-in" or "Check-out"
+    timestamp: datetime
 
 @router.get("/employees", response_model=List[dict])
 def get_employees():
@@ -59,3 +66,35 @@ def update_employee(phoneno: str, employee: EmployeeModel):
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Employee not found")
     return {"status": "success"}
+
+# Attendance Endpoints
+
+@router.post("/employees/attendance")
+def record_attendance(log: AttendanceLog):
+    # Verify employee exists
+    if not employees_collection.find_one({"phoneno": log.phoneno}):
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    new_log = log.dict()
+    new_log["timestamp"] = datetime.now() # Force server time
+    attendance_collection.insert_one(new_log)
+    return {"status": "success", "message": f"{log.type} recorded"}
+
+@router.get("/employees/attendance/{phoneno}")
+def get_attendance_history(phoneno: str):
+    logs = list(attendance_collection.find({"phoneno": phoneno}, {"_id": 0}).sort("timestamp", -1))
+    return logs
+
+@router.get("/employees/attendance/status/{phoneno}")
+def get_current_status(phoneno: str):
+    # Get latest log to determine if checked in or out
+    latest = attendance_collection.find_one(
+        {"phoneno": phoneno}, 
+        sort=[("timestamp", -1)]
+    )
+    
+    status = "Checked-out" # Default
+    if latest and latest["type"] == "Check-in":
+        status = "Checked-in"
+        
+    return {"status": status, "last_log": latest["timestamp"] if latest else None}
