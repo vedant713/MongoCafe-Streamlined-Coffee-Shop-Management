@@ -1,100 +1,109 @@
 # MongoCafe: Coffee Shop Management System
 
-A modern, full-stack web application for managing coffee shop operations, including sales tracking, customer management, employee roles, and menu customization.
+A streamlined, modern web application for managing coffee shop operations. Built for speed, usability, and scale using **FastAPI** and **React**.
 
-This project has been modernized from a legacy Tkinter desktop application to a robust web architecture using **FastAPI** (Backend) and **React** (Frontend).
+![Dashboard Preview](https://via.placeholder.com/800x400?text=MongoCafe+Dashboard+Preview)
 
 ## 🚀 Key Features
 
-*   **📊 Interactive Dashboard**:
-    *   Real-time overview of Sales, Orders, and Active Employees.
-    *   Visual statistics and quick action shortcuts.
-*   **👥 Customer Management**:
-    *   Add, edit, view, and delete customer records.
-    *   **Search**: Instantly filter customers by name or phone number.
-*   **👔 Employee Management**:
-    *   Manage staff profiles and roles (Manager, Barista, Cashier, etc.).
-    *   **Search**: Filter employees by name or role.
-*   **☕ Menu Management**:
-    *   Organized product catalog with categories (Hot Coffee, Cold Coffee, Snacks).
-    *   Quickly update prices and view product details.
-*   **✨ Modern UI/UX**:
-    *   **Glassmorphism Design**: Sleek, translucent visuals with a modern aesthetic.
-    *   **Responsive**: Works on various screen sizes.
-    *   **Icons**: Integrated `Lucide React` icons for a polished look.
+### 🔐 Advanced Security & RBAC
+-   **Dual Login Modes**:
+    -   **Staff Portal**: Secure access for Owner, Managers, and Cashiers.
+    -   **Customer Kiosk**: Limited access for self-service ordering.
+-   **Authentication Methods**:
+    -   **PIN Login**: Quick numeric access for POS terminals.
+    -   **Password Login**: Secure admin access.
+    -   **OTP Login**: Simulated mobile OTP for customers.
+-   **Role-Based Access Control (RBAC)**:
+    -   **Owner**: Full Access (Analytics, Employees, Menu, Inventory).
+    -   **Manager**: Operations Management.
+    -   **Cashier**: POS & Order Management only.
+    -   **Customer**: Place Orders only.
+
+### 🛒 Point of Sale (POS)
+-   **Visual Menu**: Beautiful glassmorphic grid with product images.
+-   **Smart Cart**: Real-time total calculation, tax, and bill splitting.
+-   **Checkout**: Integrated receipt generation and order tracking.
+
+### 📊 Analytics & Insights
+-   **Real-time Dashboard**: Live sales metrics and order counters.
+-   **Charts**: Peak sales hours and popular items visualization.
+-   **Financials**: Daily revenue tracking.
+
+### 📦 Inventory & Menu
+-   **Inventory Tracking**: Monitor stock levels of ingredients (Coffee Beans, Milk, Cups).
+-   **Menu Management**: Add/Edit products, update prices and images.
+
+---
+
+## ⚡ Quick Start
+
+### Prerequisites
+-   **Python 3.9+**
+-   **Node.js 16+** & **npm**
+
+### One-Command Startup 🚀
+We have provided a unified script to run both Backend and Frontend simultaneously.
+
+1.  **Run the App**:
+    ```bash
+    ./run_app.sh
+    ```
+    This script will:
+    -   Kill existing processes on ports 8000 (API) and 5173+ (Frontend).
+    -   Start the FastAPI Backend.
+    -   Start the React Frontend.
+
+2.  **Access the App**:
+    -   Open your browser and note the URL provided in the terminal (usually `http://localhost:5173` or similar).
+
+---
+
+## 🔑 Default Credentials (Testing)
+
+The application uses an **In-Memory Database (Mongomock)** by default, so data resets on every restart. Use these credentials to test:
+
+### Staff PINs
+| Role | PIN | Permissions |
+| :--- | :--- | :--- |
+| **Owner** | `1111` | Full Admin Access |
+| **Manager** | `2222` | Manage Staff, Inventory |
+| **Cashier** | `3333` | POS & Orders Only |
+| **Barista** | `4444` | View Orders Only |
+
+### Passwords (Login via Email)
+-   **Owner**: `owner` / `admin123`
+-   **Manager**: `manager` / `manager123`
+
+### Customer Login
+-   Select **"I'm a Customer"** on the landing page.
+-   Enter any phone number.
+-   **OTP**: `1234` (Hardcoded for simulation).
+
+---
 
 ## 🛠️ Technology Stack
 
-### Frontend
-*   **Framework**: React (Vite)
-*   **Styling**: CSS Modules / Standard CSS (Glassmorphism Theme)
-*   **Icons**: Lucide React
-*   **HTTP Client**: Fetch API
-
-### Backend
-*   **Framework**: FastAPI (Python)
-*   **Database**: MongoDB (Motor / PyMongo)
-*   **Server**: Uvicorn
+-   **Frontend**: React, Vite, React Router, Lucide Icons, Glassmorphism CSS.
+-   **Backend**: FastAPI, Pydantic, Python 3.9.
+-   **Database**: MongoDB (Production) / Mongomock (Dev/Testing).
+-   **Security**: JWT (JSON Web Tokens), BCrypt Hashing.
 
 ## 📂 Project Structure
 
 ```
-├── backend/                # FastAPI application
-│   ├── main.py             # Entry point
-│   ├── database.py         # MongoDB connection config
-│   └── routers/            # API endpoints (customers, employees, etc.)
-├── frontend/               # React application
+├── backend/
+│   ├── routers/        # API Endpoints (auth, orders, products...)
+│   ├── database.py     # DB Connection & Seeding
+│   ├── security.py     # JWT & Hashing Logic
+│   └── main.py         # App Entry Point
+├── frontend/
 │   ├── src/
-│   │   ├── components/     # Reusable UI components (Modal, Layout)
-│   │   ├── pages/          # Main views (Dashboard, Menu, etc.)
-│   │   └── App.jsx         # Routing
-├── legacy/                 # Archived Tkinter application & assets
-└── requirements.txt        # Python dependencies
+│   │   ├── components/ # Reusable UI (Layout, ProtectedRoute)
+│   │   ├── pages/      # Views (POS, Dashboard, Login)
+│   │   └── context/    # Auth & Theme State
+└── run_app.sh          # Startup Script
 ```
 
-## ⚡ Getting Started
-
-### Prerequisites
-*   Python 3.8+
-*   Node.js & npm
-*   MongoDB Instance (Local or Atlas)
-
-### 1. Backend Setup (FastAPI)
-
-1.  Navigate to the root directory.
-2.  Create and activate a virtual environment:
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # macOS/Linux
-    # venv\Scripts\activate   # Windows
-    ```
-3.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  Run the server:
-    ```bash
-    uvicorn backend.main:app --reload --port 8000
-    ```
-    *Server will start at `http://localhost:8000`*
-
-### 2. Frontend Setup (React)
-
-1.  Open a new terminal and navigate to the frontend folder:
-    ```bash
-    cd frontend
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Run the development server:
-    ```bash
-    npm run dev
-    ```
-    *App will be live at `http://localhost:5173`*
-
-## 📝 Notes
-
-*   **Authentication**: Login functionality is currently disabled for easier development access. The backend still retains the `auth` router and database collections (`login`, `owner`) for future re-enablement.
-*   **Legacy Code**: The original Python Tkinter application files have been moved to the `legacy/` directory for reference.
+---
+*Developed with ❤️ for Coffee Lovers.*
