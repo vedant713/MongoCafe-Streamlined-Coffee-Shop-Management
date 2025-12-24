@@ -25,43 +25,39 @@ const CustomerLogin = () => {
         <div style={{
             height: '100vh',
             width: '100vw',
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            background: 'var(--gradient-bg)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: "'Inter', sans-serif"
+            fontFamily: "var(--font-family)"
         }}>
-            <div style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(10px)',
+            <div className="glass" style={{
                 padding: '3rem',
-                borderRadius: '20px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '1.5rem',
                 width: '100%',
-                maxWidth: '400px',
+                maxWidth: '420px',
                 textAlign: 'center',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.3)'
             }}>
                 <div style={{
-                    width: '70px',
-                    height: '70px',
-                    background: 'linear-gradient(135deg, #00b4db 0%, #0083b0 100%)',
+                    width: '80px',
+                    height: '80px',
+                    background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    margin: '0 auto 1.5rem',
-                    boxShadow: '0 10px 20px rgba(0,180,219,0.3)'
+                    margin: '0 auto 2rem',
+                    boxShadow: '0 0 30px rgba(6, 182, 212, 0.3)'
                 }}>
-                    <Coffee size={32} color="white" />
+                    <Coffee size={40} color="white" />
                 </div>
 
-                <h2 style={{ color: 'white', marginBottom: '0.5rem', fontSize: '1.8rem' }}>Welcome!</h2>
-                <p style={{ color: '#8b9bb4', marginBottom: '2rem' }}>Enter your name to start ordering.</p>
+                <h2 style={{ color: 'white', marginBottom: '0.75rem', fontSize: '2rem', fontWeight: 700 }}>Welcome!</h2>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', fontSize: '1.1rem' }}>Enter your name to start ordering.</p>
 
                 <form onSubmit={handleLogin}>
-                    <div style={{ marginBottom: '1.5rem', position: 'relative' }}>
-                        <User size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#6e7a91' }} />
+                    <div style={{ marginBottom: '2rem', position: 'relative' }}>
+                        <User size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                         <input
                             type="text"
                             placeholder="Your Name (Optional)"
@@ -70,39 +66,36 @@ const CustomerLogin = () => {
                             style={{
                                 width: '100%',
                                 padding: '1rem 1rem 1rem 3rem',
-                                background: 'rgba(255,255,255,0.05)',
+                                background: 'rgba(255,255,255,0.03)',
                                 border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '10px',
+                                borderRadius: '1rem',
                                 color: 'white',
-                                fontSize: '1rem',
-                                outline: 'none'
+                                fontSize: '1.1rem',
+                                outline: 'none',
+                                transition: 'all 0.2s'
                             }}
+                            onFocus={e => e.target.style.borderColor = 'var(--secondary)'}
+                            onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
+                        className="btn-primary" // Use the new class
                         style={{
                             width: '100%',
-                            padding: '1rem',
-                            background: 'linear-gradient(90deg, #00b4db 0%, #0083b0 100%)',
-                            border: 'none',
-                            borderRadius: '10px',
-                            color: 'white',
-                            fontSize: '1rem',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '0.5rem',
-                            transition: 'transform 0.2s',
+                            gap: '0.75rem',
+                            fontSize: '1.1rem',
+                            background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', // Override to match accent
                             opacity: loading ? 0.7 : 1
                         }}
                     >
                         {loading ? 'Starting...' : 'Start Ordering'}
-                        {!loading && <ArrowRight size={18} />}
+                        {!loading && <ArrowRight size={20} />}
                     </button>
                 </form>
             </div>

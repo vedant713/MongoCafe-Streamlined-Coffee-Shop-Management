@@ -14,16 +14,39 @@ const QuickAction = ({ title, to, color }) => {
             onClick={() => navigate(to)}
             className="glass"
             style={{
-                width: '100%', padding: '1.5rem', borderRadius: '1rem',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-                border: `1px solid ${color}33`, // 20% opacity approx
-                textAlign: 'center', transition: 'all 0.2s',
-                color: 'var(--text)'
+                width: '100%', padding: '1.5rem', borderRadius: '1.5rem',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
+                border: '1px solid var(--glass-border)',
+                background: `linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%)`,
+                textAlign: 'center', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                color: 'var(--text)', cursor: 'pointer',
+                position: 'relative', overflow: 'hidden'
+            }}
+            onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.borderColor = color;
+                e.currentTarget.style.boxShadow = `0 10px 30px -10px ${color}40`;
+            }}
+            onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = 'var(--glass-border)';
+                e.currentTarget.style.boxShadow = 'none';
             }}
         >
-            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{title}</h3>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                Go to page <ArrowRight size={14} />
+            <div style={{
+                padding: '0.8rem', borderRadius: '12px', background: `${color}15`, color: color,
+                marginBottom: '0.2rem', transition: 'all 0.3s'
+            }}>
+                {title === 'Manage Customers' && <Users size={24} />}
+                {title === 'Update Menu' && <ShoppingBag size={24} />}
+                {title === 'Manage Staff' && <Users size={24} />}
+                {title === 'Inventory' && <ShoppingBag size={24} />}
+                {/* Fallback icon if needed, or dynamic icon passing */}
+                {!['Manage Customers', 'Update Menu', 'Manage Staff', 'Inventory'].includes(title) && <ArrowRight size={24} />}
+            </div>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>{title}</h3>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', opacity: 0.8 }}>
+                View Details <ArrowRight size={14} />
             </span>
         </button>
     );
@@ -69,47 +92,53 @@ const Dashboard = () => {
     }, []);
 
     return (
-        <div>
-            <div style={{ marginBottom: '2rem' }}>
-                <h2 style={{ margin: 0 }}>Overview</h2>
-                <p style={{ color: 'var(--text-secondary)' }}>Welcome back to MongoCafe</p>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontFamily: 'var(--font-family)' }}>
+            <div style={{ marginBottom: '3rem', animation: 'fadeIn 0.5s ease-out' }}>
+                <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '2.5rem', fontWeight: 800, background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Dashboard</h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Welcome back to MongoCafe Overview</p>
             </div>
 
             {/* Stats Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
                 <StatsCard
                     title="Total Sales"
                     value={`₹${stats.total_sales}`}
-                    icon={<DollarSign size={24} />}
+                    icon={<DollarSign />}
                     color="#22c55e"
                 />
                 <StatsCard
                     title="Total Orders"
                     value={stats.total_orders}
-                    icon={<ShoppingBag size={24} />}
+                    icon={<ShoppingBag />}
                     color="#ec4899"
                 />
                 <StatsCard
                     title="System Status"
                     value="Online"
-                    icon={<Users size={24} />}
+                    icon={<Users />}
                     color="#3b82f6"
                 />
             </div>
 
             {/* Charts Section */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                <SalesChart data={peakHours} />
-                <PopularItemsChart data={popularItems} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+                <div style={{ height: '100%', animation: 'slideUp 0.5s ease-out 0.1s backwards' }}>
+                    <SalesChart data={peakHours} />
+                </div>
+                <div style={{ height: '100%', animation: 'slideUp 0.5s ease-out 0.2s backwards' }}>
+                    <PopularItemsChart data={popularItems} />
+                </div>
             </div>
 
             {/* Quick Actions */}
-            <h3 style={{ marginBottom: '1.5rem' }}>Quick Actions</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                <QuickAction title="Manage Customers" to="/customers" color="#9333ea" />
-                <QuickAction title="Update Menu" to="/menu" color="#eab308" />
-                <QuickAction title="Manage Staff" to="/employees" color="#3b82f6" />
-                <QuickAction title="Inventory" to="/inventory" color="#f97316" />
+            <div style={{ marginBottom: '2rem', animation: 'slideUp 0.5s ease-out 0.3s backwards' }}>
+                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: 700, color: 'var(--text)' }}>Quick Actions</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+                    <QuickAction title="Manage Customers" to="/customers" color="#9333ea" />
+                    <QuickAction title="Update Menu" to="/menu" color="#eab308" />
+                    <QuickAction title="Manage Staff" to="/employees" color="#3b82f6" />
+                    <QuickAction title="Inventory" to="/inventory" color="#f97316" />
+                </div>
             </div>
         </div>
     );
