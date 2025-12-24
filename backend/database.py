@@ -15,7 +15,7 @@ class Database:
             # Fallback to mongomock since local mongo is missing
             print("Using in-memory MongoDB (Mongomock)")
             cls._instance.client = mongomock.MongoClient()
-            cls._instance.db = cls._instance.client[os.getenv("DB_NAME", "coffeeshop")]
+            cls._instance.db = cls._instance.client[os.getenv("DB_NAME", "coffeeshop")] # Use consistent DB name
             
             # Seed data if empty
             if cls._instance.db["prices"].count_documents({}) == 0:
@@ -30,30 +30,53 @@ class Database:
                 ]
                 cls._instance.db["prices"].insert_many(seed_data)
 
-            # Seed Users (Owner & Manager) with Hashed Passwords
-            if cls._instance.db["users"].count_documents({}) == 0:
-                print("Seeding database with default users...")
-                users_data = [
+            # Seed Users (Owner & Staff) with Hashed Passwords
+            # UPDATED FOR PHASE 5 SCHEMAS
+            if cls._instance.db["users_staff"].count_documents({}) == 0:
+                print("Seeding database with default STAFF users...")
+                staff_data = [
                     {
-                        "username": "owner", 
-                        "password": get_password_hash("owner123"), 
+                        "email": "owner@mongo.cafe", 
+                        "username": "owner",
+                        "password": get_password_hash("admin123"), 
+                        "pin": get_password_hash("1111"), # Matches UI instructions
                         "role": "owner",
                         "name": "Big Boss"
                     },
                     {
-                        "username": "manager", 
+                        "email": "manager@mongo.cafe", 
+                        "username": "manager",
                         "password": get_password_hash("manager123"), 
+                        "pin": get_password_hash("2222"),
                         "role": "manager",
                         "name": "Shift Lead"
                     },
                     {
-                        "username": "cashier", 
+                        "email": "cashier@mongo.cafe", 
+                        "username": "cashier",
                         "password": get_password_hash("cashier123"), 
+                        "pin": get_password_hash("3333"),
                         "role": "cashier",
                         "name": "Barista Bob"
+                    },
+                    {
+                        "email": "barista@mongo.cafe", 
+                        "username": "barista",
+                        "password": get_password_hash("barista123"), 
+                        "pin": get_password_hash("4444"),
+                        "role": "barista",
+                        "name": "Just Barista"
                     }
                 ]
-                cls._instance.db["users"].insert_many(users_data)
+                cls._instance.db["users_staff"].insert_many(staff_data)
+                
+                # Also Seed a demo customer if not exists
+                if cls._instance.db["customers"].count_documents({}) == 0:
+                    cls._instance.db["customers"].insert_one({
+                        "phone": "9876543210",
+                        "name": "Demo Customer",
+                        "email": "demo@customer.com"
+                    })
 
         return cls._instance
 

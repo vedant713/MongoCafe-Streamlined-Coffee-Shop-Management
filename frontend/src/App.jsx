@@ -1,35 +1,41 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
+import Menu from './pages/Menu';
+import StaffLogin from './pages/StaffLogin';
+import CustomerLogin from './pages/CustomerLogin';
+import Landing from './pages/Landing';
+import POS from './pages/POS';
 import Customers from './pages/Customers';
 import Employees from './pages/Employees';
-import Menu from './pages/Menu';
-import Login from './pages/Login';
-import POS from './pages/POS';
 import Inventory from './pages/Inventory';
+import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/landing" element={<Landing />} />
+        <Route path="/staff/login" element={<StaffLogin />} />
+        <Route path="/customer/login" element={<CustomerLogin />} />
+        <Route path="/login" element={<Navigate to="/staff/login" replace />} />
 
-          {/* Protected Routes directly use Layout via ProtectedRoute component */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/pos" element={<POS />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/employees" element={<Employees />} />
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/inventory" element={<Inventory />} />
-          </Route>
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          {/* Dashboard is protected, wrapped in Layout by ProtectedRoute */}
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/pos" element={<POS />} />
+          <Route path="/customers" element={<Customers />} />
+          <Route path="/employees" element={<Employees />} />
+          <Route path="/inventory" element={<Inventory />} />
+        </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/landing" replace />} />
+      </Routes>
     </AuthProvider>
   );
 }

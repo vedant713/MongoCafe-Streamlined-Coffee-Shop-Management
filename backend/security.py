@@ -12,6 +12,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours for convenience
 def verify_password(plain_password, hashed_password):
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
+# Alias for PIN verification, uses same bcrypt mechanism
+def verify_pin(plain_pin, hashed_pin):
+    return verify_password(plain_pin, hashed_pin)
+
 def get_password_hash(password):
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 

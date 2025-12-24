@@ -20,20 +20,42 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         try {
-            const res = await axios.post('http://localhost:8000/api/login', { username, password });
-            const { access_token, role, username: dbUsername } = res.data;
-
-            const userData = { username: dbUsername, role };
-            setUser(userData);
-
-            localStorage.setItem('token', access_token);
-            localStorage.setItem('user', JSON.stringify(userData));
-
-            axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-            return { success: true };
+            // Backend expects 'email' field, but logic checks both username/email
+            const res = await axios.post('http://localhost:8000/api/auth/staff/login', { email: username, password });
+            return processLogin(res.data);
         } catch (err) {
             return { success: false, message: err.response?.data?.detail || 'Login failed' };
         }
+    };
+
+    const loginWithPin = async (username, pin) => {
+        try {
+            // Backend only needs PIN to find user
+            const res = await axios.post('http://localhost:8000/api/auth/staff/pin', { pin });
+            return processLogin(res.data);
+        } catch (err) {
+            return { success: false, message: err.response?.data?.detail || 'PIN Login failed' };
+        }
+    };
+
+    const loginCustomer = async (phoneno, otp) => {
+        try {
+            // Backend expects 'phone' not 'phoneno'
+            const res = await axios.post('http://localhost:8000/api/auth/customer/verify-otp', { phone: phoneno, otp });
+            return processLogin(res.data);
+        } catch (err) {
+            return { success: false, message: err.response?.data?.detail || 'OTP Verify failed' };
+        }
+    };
+
+    const processLogin = (data) => {
+        const { access_token, role, username } = data;
+        const userData = { username, role };
+        setUser(userData);
+        localStorage.setItem('token', access_token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+        return { success: true };
     };
 
     const logout = () => {
@@ -44,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, loginWithPin, loginCustomer, logout, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );
