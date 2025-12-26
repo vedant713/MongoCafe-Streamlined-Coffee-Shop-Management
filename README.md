@@ -6,6 +6,18 @@ A streamlined, modern web application for managing coffee shop operations. Built
 
 ## 🚀 Key Features
 
+### 🎨 Premium UI/UX Experience
+-   **Dynamic Landing Page**: Interactive split-screen layout with hover expansions and floating 3D animations.
+-   **Animated Interactions**: Staggered product loading, hover zoom effects, and liquid-style buttons.
+-   **Glassmorphism**: Modern frosted glass aesthetics across the dashboard, menu, and modals.
+-   **Global Themes**: Dark mode optimized with vibrant gradients and "OUTFIT" typography.
+
+### 🛒 E-Commerce & POS Flow
+-   **Visual Menu**: Beautiful grid layout with staggered animation entrance.
+-   **Sidebar Cart**: Persistent slide-out cart drawer for seamless shopping.
+-   **Dedicated Checkout**: Full-page, Amazon-style checkout experience with order summaries and multiple payment modes (Cash, Card, UPI, Split).
+-   **Smart Bill Splitting**: validation logic for complex payment scenarios.
+
 ### 🔐 Advanced Security & RBAC
 -   **Dual Login Modes**:
     -   **Staff Portal**: Secure access for Owner, Managers, and Cashiers.
@@ -15,24 +27,20 @@ A streamlined, modern web application for managing coffee shop operations. Built
     -   **Password Login**: Secure admin access.
     -   **OTP Login**: Simulated mobile OTP for customers.
 -   **Role-Based Access Control (RBAC)**:
-    -   **Owner**: Full Access (Analytics, Employees, Menu, Inventory).
+    -   **Owner**: Full Access (Analytics, Employees, Menu Management, Inventory).
     -   **Manager**: Operations Management.
-    -   **Cashier**: POS & Order Management only.
+    -   **Cashier**: POS & Order Management.
     -   **Customer**: Place Orders only.
 
-### 🛒 Point of Sale (POS)
--   **Visual Menu**: Beautiful glassmorphic grid with product images.
--   **Smart Cart**: Real-time total calculation, tax, and bill splitting.
--   **Checkout**: Integrated receipt generation and order tracking.
+### 📦 Inventory & Menu Management
+-   **Live Inventory**: Monitor stock levels (Coffee Beans, Milk, Cups).
+-   **Menu Editor**: **New!** Owners can Add items with image uploads directly from the UI.
+-   **Real-time Updates**: Price and stock changes reflect instantly.
 
 ### 📊 Analytics & Insights
 -   **Real-time Dashboard**: Live sales metrics and order counters.
 -   **Charts**: Peak sales hours and popular items visualization.
 -   **Financials**: Daily revenue tracking.
-
-### 📦 Inventory & Menu
--   **Inventory Tracking**: Monitor stock levels of ingredients (Coffee Beans, Milk, Cups).
--   **Menu Management**: Add/Edit products, update prices and images.
 
 ---
 
@@ -67,7 +75,7 @@ The application uses an **In-Memory Database (Mongomock)** by default, so data r
 | Role | PIN | Permissions |
 | :--- | :--- | :--- |
 | **Owner** | `1111` | Full Admin Access |
-| **Manager** | `2222` | Manage Staff, Inventory |
+| **Manager** | `2222` | Manage Staff, Menu |
 | **Cashier** | `3333` | POS & Orders Only |
 | **Barista** | `4444` | View Orders Only |
 
@@ -76,7 +84,7 @@ The application uses an **In-Memory Database (Mongomock)** by default, so data r
 -   **Manager**: `manager` / `manager123`
 
 ### Customer Login
--   Select **"I'm a Customer"** on the landing page.
+-   Select **"Customer"** on the landing page.
 -   Enter any phone number.
 -   **OTP**: `1234` (Hardcoded for simulation).
 
@@ -84,7 +92,9 @@ The application uses an **In-Memory Database (Mongomock)** by default, so data r
 
 ## 🛠️ Technology Stack
 
--   **Frontend**: React, Vite, React Router, Lucide Icons, Glassmorphism CSS.
+-   **Frontend**: React 19, Vite, React Router v7, Lucide Icons.
+-   **Styling**: Custom CSS Variables, Glassmorphism, Advanced Keyframe Animations.
+-   **State Management**: React Context API (Auth, Cart, Theme).
 -   **Backend**: FastAPI, Pydantic, Python 3.9.
 -   **Database**: MongoDB (Production) / Mongomock (Dev/Testing).
 -   **Security**: JWT (JSON Web Tokens), BCrypt Hashing.
@@ -99,9 +109,10 @@ The application uses an **In-Memory Database (Mongomock)** by default, so data r
 │   └── main.py         # App Entry Point
 ├── frontend/
 │   ├── src/
-│   │   ├── components/ # Reusable UI (Layout, ProtectedRoute)
-│   │   ├── pages/      # Views (POS, Dashboard, Login)
-│   │   └── context/    # Auth & Theme State
+│   │   ├── components/ # Reusable UI (CartDrawer, Layout)
+│   │   ├── pages/      # Views (Menu, Dashboard, Checkout)
+│   │   ├── context/    # Global State (Auth, Cart)
+│   │   └── index.css   # Global Styles & Animations
 └── run_app.sh          # Startup Script
 ```
 
