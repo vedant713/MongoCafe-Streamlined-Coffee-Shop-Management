@@ -22,22 +22,22 @@ class Database:
                 print("Seeding database with default products...")
                 seed_data = [
                     # Hot Coffee (Indian Context)
-                    {"name": "Masala Chai", "price": 40, "category": "Hot Coffee", "image_url": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80"},
-                    {"name": "Filter Coffee", "price": 50, "category": "Hot Coffee", "image_url": "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=500&q=80"}, # New
-                    {"name": "Espresso", "price": 120, "category": "Hot Coffee", "image_url": "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=500&q=80"},
-                    {"name": "Cappuccino", "price": 180, "category": "Hot Coffee", "image_url": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80"},
+                    {"name": "Masala Chai", "price": 40, "category": "Hot Coffee", "image_url": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500&q=80", "recipe": {"Milk": 100, "Tea Leaves": 10, "Cups": 1}},
+                    {"name": "Filter Coffee", "price": 50, "category": "Hot Coffee", "image_url": "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=500&q=80", "recipe": {"Milk": 80, "Coffee Powder": 15, "Cups": 1}}, 
+                    {"name": "Espresso", "price": 120, "category": "Hot Coffee", "image_url": "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=500&q=80", "recipe": {"Espresso Beans": 18, "Cups": 1}},
+                    {"name": "Cappuccino", "price": 180, "category": "Hot Coffee", "image_url": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500&q=80", "recipe": {"Espresso Beans": 18, "Milk": 150, "Cups": 1}},
                     
                     # Cold Coffee
-                    {"name": "Iced Americano", "price": 160, "category": "Cold Coffee", "image_url": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=500&q=80"}, # New
-                    {"name": "Frappe", "price": 220, "category": "Cold Coffee", "image_url": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=500&q=80"},
-                    {"name": "Cold Coffee with Ice Cream", "price": 250, "category": "Cold Coffee", "image_url": "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=500&q=80"},
+                    {"name": "Iced Americano", "price": 160, "category": "Cold Coffee", "image_url": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=500&q=80", "recipe": {"Espresso Beans": 18, "Water": 200, "Cups": 1}},
+                    {"name": "Frappe", "price": 220, "category": "Cold Coffee", "image_url": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=500&q=80", "recipe": {"Espresso Beans": 18, "Milk": 200, "Ice Cream": 50, "Cups": 1}},
+                    {"name": "Cold Coffee with Ice Cream", "price": 250, "category": "Cold Coffee", "image_url": "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=500&q=80", "recipe": {"Espresso Beans": 18, "Milk": 200, "Ice Cream": 100, "Cups": 1}},
 
                     # Snacks
-                    {"name": "Vada Pav", "price": 60, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&q=80"}, # Valid Indian Street Food
-                    {"name": "Bun Maska", "price": 80, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=80"}, # Bread/Butter
-                    {"name": "Paneer Sandwich", "price": 150, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80"},
-                    {"name": "Veg Burger", "price": 140, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&q=80"},
-                    {"name": "Fries", "price": 100, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=500&q=80"} # Confirmed working
+                    {"name": "Vada Pav", "price": 60, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=500&q=80", "recipe": {"Pav": 1, "Vada": 1}}, 
+                    {"name": "Bun Maska", "price": 80, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=80", "recipe": {"Bun": 1, "Butter": 20}}, 
+                    {"name": "Paneer Sandwich", "price": 150, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&q=80", "recipe": {"Bread": 2, "Paneer": 50}},
+                    {"name": "Veg Burger", "price": 140, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&q=80", "recipe": {"Burger Bun": 1, "Patty": 1}},
+                    {"name": "Fries", "price": 100, "category": "Snacks", "image_url": "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=500&q=80", "recipe": {"Potatoes": 200}}
                 ]
                 cls._instance.db["prices"].insert_many(seed_data)
 

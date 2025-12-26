@@ -33,15 +33,6 @@ class OrderModel(BaseModel):
     customer_name: Optional[str] = "Walk-in"
 
 # Recipe Mapping (Product Name -> {Ingredient Name: Quantity})
-RECIPES = {
-    "Espresso": {"Espresso Beans": 18, "Cups": 1},
-    "Latte": {"Espresso Beans": 18, "Milk": 200, "Cups": 1},
-    "Cappuccino": {"Espresso Beans": 18, "Milk": 150, "Cups": 1},
-    "Iced Coffee": {"Espresso Beans": 18, "Milk": 100, "Cups": 1}, 
-    "Croissant": {"Croissants": 1},
-    "Muffin": {"Muffins": 1}
-}
-
 @router.post("/orders")
 def create_order(
     order: OrderModel, 
@@ -53,13 +44,19 @@ def create_order(
 
     new_order = order.dict()
     
+    # 0. Fetch Recipes for items
+    item_names = [item["name"] for item in new_order["items"]]
+    products_cursor = db.get_collection("prices").find({"name": {"$in": item_names}})
+    product_map = {p["name"]: p for p in products_cursor}
+
     # 1. Check Inventory
     for item in new_order["items"]:
         product_name = item["name"]
         quantity = item["quantity"]
         
-        if product_name in RECIPES:
-            ingredients = RECIPES[product_name]
+        product_doc = product_map.get(product_name)
+        if product_doc and "recipe" in product_doc and product_doc["recipe"]:
+            ingredients = product_doc["recipe"]
             for ing_name, amount_needed in ingredients.items():
                 total_needed = amount_needed * quantity
                 inventory_item = inventory_collection.find_one({"name": ing_name})
@@ -73,8 +70,10 @@ def create_order(
     for item in new_order["items"]:
         product_name = item["name"]
         quantity = item["quantity"]
-        if product_name in RECIPES:
-            ingredients = RECIPES[product_name]
+        
+        product_doc = product_map.get(product_name)
+        if product_doc and "recipe" in product_doc and product_doc["recipe"]:
+            ingredients = product_doc["recipe"]
             for ing_name, amount_needed in ingredients.items():
                 total_deducted = amount_needed * quantity
                 inventory_collection.update_one(

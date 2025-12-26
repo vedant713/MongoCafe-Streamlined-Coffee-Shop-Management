@@ -12,12 +12,13 @@ router = APIRouter()
 db = Database()
 products_collection = db.get_collection("prices") # Note: Collection name is 'prices' in DB for some reason
 
-# Update ProductModel to be consistent, though for Form data we use function args
+# Update ProductModel to be consistent
 class ProductModel(BaseModel):
     name: Optional[str]
     price: Optional[int]
     image_url: Optional[str] = None
     category: Optional[str] = None
+    recipe: Optional[dict] = None  # New field: {"Ingredient Name": Quantity}
 
 @router.get("/products", response_model=List[dict])
 def get_products():
@@ -33,6 +34,7 @@ def add_product(
     name: str = Form(...),
     price: int = Form(...),
     category: str = Form("Snacks"),
+    recipe: str = Form(None), # Optional JSON string for recipe
     image: UploadFile = File(None),
     user: UserContext = Depends(require_permission(PERM_MENU_WRITE))
 ):
@@ -56,11 +58,21 @@ def add_product(
             
         image_url = f"/uploads/{unique_filename}"
 
+    # Parse recipe if provided
+    recipe_dict = {}
+    if recipe:
+        import json
+        try:
+            recipe_dict = json.loads(recipe)
+        except Exception:
+            pass # Ignore invalid json for now or raise error
+
     new_product = {
         "name": name,
         "price": price,
         "category": category,
-        "image_url": image_url
+        "image_url": image_url,
+        "recipe": recipe_dict
     }
 
     products_collection.insert_one(new_product)
