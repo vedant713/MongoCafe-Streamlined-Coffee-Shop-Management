@@ -2,10 +2,17 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, Check, Edit2, ShoppingCart, Plus, Minus, X, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import CheckoutModal from '../components/CheckoutModal';
+import { useCart } from '../context/CartContext';
+import CartDrawer from '../components/CartDrawer';
+// CheckoutModal import removed
 
 const Menu = () => {
     const { user } = useAuth();
+    const {
+        cart, addToCart, getCartTotal, getCartCount,
+        setIsCartOpen, toggleCart
+    } = useCart();
+
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [search, setSearch] = useState('');
@@ -14,9 +21,7 @@ const Menu = () => {
     const [editPrice, setEditPrice] = useState({});
     const [editingId, setEditingId] = useState(null);
 
-    // Cart State
-    const [cart, setCart] = useState([]);
-    const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+    // Removed local cart state & CheckoutModal state
 
     // Order History State
     const [showHistory, setShowHistory] = useState(false);
@@ -100,31 +105,8 @@ const Menu = () => {
         }
     };
 
-    const addToCart = (product) => {
-        setCart(prev => {
-            const existing = prev.find(item => item._id === product._id);
-            if (existing) {
-                return prev.map(item => item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item);
-            }
-            return [...prev, { ...product, quantity: 1 }];
-        });
-    };
-
-    const removeFromCart = (productId) => {
-        setCart(prev => prev.filter(item => item._id !== productId));
-    };
-
-    const getCartTotal = () => {
-        return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-    };
-
-    const handleOrderComplete = () => {
-        setCart([]);
-        // Keep modal open on success step or close it? 
-        // usually CheckoutModal handles showing success. 
-        // We'll reset cart when fully closed or rely on modal's internal state.
-        // Actually CheckoutModal calls onOrderComplete when order is placed.
-    };
+    // removed addToCart, removeFromCart, getCartTotal (moved to context)
+    // removed handleOrderComplete
 
     const getImage = (product) => {
         if (product.image_url) return product.image_url;
@@ -368,7 +350,7 @@ const Menu = () => {
 
                     {cart.length > 0 && (
                         <button
-                            onClick={() => setIsCheckoutOpen(true)}
+                            onClick={toggleCart} // Toggle drawer
                             style={{
                                 background: 'var(--primary)', color: 'white',
                                 border: 'none', borderRadius: '3rem',
@@ -380,7 +362,7 @@ const Menu = () => {
                             }}
                         >
                             <ShoppingCart />
-                            <span>View Cart ({cart.reduce((a, b) => a + b.quantity, 0)})</span>
+                            <span>View Cart ({getCartCount()})</span>
                             <span style={{ background: 'rgba(255,255,255,0.2)', padding: '0.2rem 0.6rem', borderRadius: '1rem', fontSize: '1rem' }}>
                                 ₹{getCartTotal()}
                             </span>
@@ -389,15 +371,8 @@ const Menu = () => {
                 </div>
             )}
 
-            {/* Checkout Modal */}
-            {isCheckoutOpen && (
-                <CheckoutModal
-                    cart={cart}
-                    total={getCartTotal()}
-                    onClose={() => setIsCheckoutOpen(false)}
-                    onOrderComplete={handleOrderComplete}
-                />
-            )}
+            {/* Cart Drawer */}
+            <CartDrawer />
 
             {/* Order History Modal */}
             {showHistory && (
