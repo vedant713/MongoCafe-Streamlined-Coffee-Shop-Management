@@ -1,6 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import List, Optional
+import shutil
+import os
+import uuid
 from backend.database import Database
 from backend.auth_utils import require_permission, PERM_MENU_READ, PERM_MENU_WRITE, UserContext, get_current_user
 from backend.audit import log_action
@@ -9,29 +12,16 @@ router = APIRouter()
 db = Database()
 products_collection = db.get_collection("prices") # Note: Collection name is 'prices' in DB for some reason
 
+# Update ProductModel to be consistent, though for Form data we use function args
 class ProductModel(BaseModel):
-    name: str
-    price: int
-    image_url: str
+    name: Optional[str]
+    price: Optional[int]
+    image_url: Optional[str] = None
+    category: Optional[str] = None
 
 @router.get("/products", response_model=List[dict])
 def get_products():
-    # Public endpoint? Or require login?
-    # Usually menu is public. If we want to restrict to logged in users:
-    # user: UserContext = Depends(require_permission(PERM_MENU_READ))
-    # For now, let's keep it public so unauthenticated people (or just anyone) can see menu?
-    # Requirement said "Customer users must ONLY access minimal endpoints".
-    # Implementation plan said "Require permission".
-    # Let's be strict per plan. But Customers have PERM_MENU_READ.
-    # Actually, if we make it public, we don't need token. 
-    # But for "Real-world RBAC", usually menu IS public.
-    # However, to demonstrate RBAC, I will enforce it. But wait, can a random person see menu?
-    # Let's say yes. But if the requirement says "Customer users... must NEVER access admin routes",
-    # implies they CAN access customer routes.
-    # I'll leave GET public or optional auth.
-    # "Customer users must ONLY access minimal endpoints".
-    # Let's keep it open, but maybe `audit` if logged in?
-    # Simpler: Open for read, protected for write.
+    # Public endpoint
     products = []
     for p in products_collection.find():
         p["_id"] = str(p["_id"])
@@ -40,17 +30,45 @@ def get_products():
 
 @router.post("/products")
 def add_product(
-    product: ProductModel,
+    name: str = Form(...),
+    price: int = Form(...),
+    category: str = Form("Snacks"),
+    image: UploadFile = File(None),
     user: UserContext = Depends(require_permission(PERM_MENU_WRITE))
 ):
-    if products_collection.find_one({"name": product.name}):
+    if products_collection.find_one({"name": name}):
         raise HTTPException(status_code=400, detail="Product already exists")
     
-    products_collection.insert_one(product.dict())
+    image_url = "/images/latte.png" # Default fallback
     
-    log_action(user.user_id, user.role, "create", "product", product.name)
+    if image:
+        # Save image locally
+        file_extension = os.path.splitext(image.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        # Ensure directory exists (it should, but just in case)
+        upload_dir = "frontend/public/uploads"
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        file_path = os.path.join(upload_dir, unique_filename)
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+            
+        image_url = f"/uploads/{unique_filename}"
+
+    new_product = {
+        "name": name,
+        "price": price,
+        "category": category,
+        "image_url": image_url
+    }
+
+    products_collection.insert_one(new_product)
+    new_product["_id"] = str(new_product["_id"])
     
-    return {"status": "success", "message": "Product added"}
+    log_action(user.user_id, user.role, "create", "product", name)
+    
+    return {"status": "success", "message": "Product added", "product": new_product}
 
 @router.delete("/products/{name}")
 def delete_product(
@@ -71,9 +89,14 @@ def update_product(
     product: ProductModel,
     user: UserContext = Depends(require_permission(PERM_MENU_WRITE))
 ):
+    update_data = {k: v for k, v in product.dict().items() if v is not None}
+    
+    if not update_data:
+         raise HTTPException(status_code=400, detail="No fields to update")
+
     result = products_collection.update_one(
         {"name": name},
-        {"$set": product.dict()}
+        {"$set": update_data}
     )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Product not found")

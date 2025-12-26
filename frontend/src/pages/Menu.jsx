@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Check, Edit2, ShoppingCart, Plus, Minus, X } from 'lucide-react';
+import { Search, Check, Edit2, ShoppingCart, Plus, Minus, X, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import CheckoutModal from '../components/CheckoutModal';
 
@@ -22,6 +22,11 @@ const Menu = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [orderHistory, setOrderHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(false);
+
+    // Add Item State
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [newItem, setNewItem] = useState({ name: '', price: '', category: 'Snacks', image: null });
+    const [uploading, setUploading] = useState(false);
 
     const fetchHistory = async () => {
         setHistoryLoading(true);
@@ -131,6 +136,35 @@ const Menu = () => {
         return '/images/latte.png'; // Default
     };
 
+    const handleAddItem = async (e) => {
+        e.preventDefault();
+        setUploading(true);
+
+        const formData = new FormData();
+        formData.append('name', newItem.name);
+        formData.append('price', newItem.price);
+        formData.append('category', newItem.category);
+        if (newItem.image) {
+            formData.append('image', newItem.image);
+        }
+
+        try {
+            await axios.post('http://localhost:8000/api/products', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            setIsAddModalOpen(false);
+            setNewItem({ name: '', price: '', category: 'Snacks', image: null });
+            fetchProducts();
+        } catch (err) {
+            console.error(err);
+            alert('Failed to add product');
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const categories = ['All', 'Hot Coffee', 'Cold Coffee', 'Snacks'];
     const isAdmin = user && (user.role === 'owner' || user.role === 'manager');
 
@@ -178,6 +212,21 @@ const Menu = () => {
                             </button>
                         ))}
                     </div>
+
+                    {isAdmin && (
+                        <button
+                            onClick={() => setIsAddModalOpen(true)}
+                            style={{
+                                padding: '0.75rem 1.5rem', borderRadius: '1rem',
+                                background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.1)',
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                fontWeight: 600, transition: 'all 0.2s', marginLeft: 'auto'
+                            }}
+                            className="hover:bg-white/20"
+                        >
+                            <Plus size={18} /> Add Item
+                        </button>
+                    )}
 
                     {/* Search */}
                     <div style={{ position: 'relative', flex: 1, minWidth: '280px', maxWidth: '400px' }}>
@@ -393,6 +442,113 @@ const Menu = () => {
                                 </div>
                             )
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Add Item Modal */}
+            {isAddModalOpen && (
+                <div className="modal-overlay" style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <div className="glass" style={{
+                        padding: '2rem', borderRadius: '1.5rem', width: '500px', maxWidth: '95%',
+                        border: '1px solid var(--glass-border)', boxShadow: 'var(--glass-shadow)',
+                        background: 'rgba(15, 23, 42, 0.8)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Add New Item</h2>
+                            <button onClick={() => setIsAddModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}><X /></button>
+                        </div>
+
+                        <form onSubmit={handleAddItem} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Name</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newItem.name}
+                                    onChange={e => setNewItem({ ...newItem, name: e.target.value })}
+                                    style={{
+                                        width: '100%', padding: '0.8rem', borderRadius: '0.8rem',
+                                        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                        color: 'white', outline: 'none'
+                                    }}
+                                    placeholder="e.g. Mocha Frappe"
+                                />
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Price (₹)</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        value={newItem.price}
+                                        onChange={e => setNewItem({ ...newItem, price: e.target.value })}
+                                        style={{
+                                            width: '100%', padding: '0.8rem', borderRadius: '0.8rem',
+                                            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                            color: 'white', outline: 'none'
+                                        }}
+                                        placeholder="0"
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Category</label>
+                                    <select
+                                        value={newItem.category}
+                                        onChange={e => setNewItem({ ...newItem, category: e.target.value })}
+                                        style={{
+                                            width: '100%', padding: '0.8rem', borderRadius: '0.8rem',
+                                            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                                            color: 'white', outline: 'none'
+                                        }}
+                                    >
+                                        <option value="Hot Coffee">Hot Coffee</option>
+                                        <option value="Cold Coffee">Cold Coffee</option>
+                                        <option value="Snacks">Snacks</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Image</label>
+                                <div style={{
+                                    border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '0.8rem', padding: '1.5rem',
+                                    textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s',
+                                    background: newItem.image ? 'rgba(34, 197, 94, 0.1)' : 'transparent',
+                                    borderColor: newItem.image ? 'var(--success)' : 'rgba(255,255,255,0.1)'
+                                }}
+                                    onClick={() => document.getElementById('file-upload').click()}
+                                >
+                                    <input
+                                        id="file-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={e => setNewItem({ ...newItem, image: e.target.files[0] })}
+                                        style={{ display: 'none' }}
+                                    />
+                                    <Upload size={24} style={{ marginBottom: '0.5rem', color: newItem.image ? 'var(--success)' : 'var(--text-secondary)' }} />
+                                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                        {newItem.image ? newItem.image.name : 'Click to upload image'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={uploading}
+                                className="btn-primary"
+                                style={{
+                                    width: '100%', padding: '1rem', borderRadius: '1rem',
+                                    fontSize: '1rem', fontWeight: 600, marginTop: '1rem'
+                                }}
+                            >
+                                {uploading ? 'Adding...' : 'Add Product'}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}
