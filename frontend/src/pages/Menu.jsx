@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Check, Edit2, ShoppingCart, Plus, Minus, X, Upload } from 'lucide-react';
+import { Search, Check, Edit2, ShoppingCart, Plus, Minus, X, Upload, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import CartDrawer from '../components/CartDrawer';
@@ -155,9 +155,10 @@ const Menu = () => {
             {/* Header Area */}
             <div style={{ marginBottom: '3rem', textAlign: 'center', position: 'relative' }}>
                 <div style={{ position: 'absolute', top: '-50px', left: '50%', transform: 'translateX(-50%)', width: '200px', height: '200px', background: 'var(--primary)', filter: 'blur(100px)', opacity: 0.15, zIndex: -1 }} />
-                <h2 style={{
-                    margin: '0 0 1rem', fontSize: '3rem', fontWeight: 800,
-                    background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                <h2 className="animate-title" style={{
+                    margin: '0 0 1rem', fontSize: '3.5rem', fontWeight: 800,
+                    background: 'linear-gradient(to right, #fff, #94a3b8, #fff)',
+                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                     letterSpacing: '-0.02em'
                 }}>
                     Our Menu
@@ -167,30 +168,34 @@ const Menu = () => {
                 </p>
             </div>
 
-            {/* Controls Container */}
+            {/* Sticky Controls Container */}
             <div className="glass" style={{
+                position: 'sticky', top: '1rem', zIndex: 50,
                 borderRadius: '1.5rem', padding: '1rem', marginBottom: '3rem',
                 display: 'flex', flexDirection: 'column', gap: '1.5rem',
-                border: '1px solid rgba(255,255,255,0.05)'
+                border: '1px solid rgba(255,255,255,0.05)',
+                backdropFilter: 'blur(20px)', background: 'rgba(15, 23, 42, 0.7)',
+                boxShadow: '0 10px 30px -5px rgba(0,0,0,0.3)'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
-                    {/* Filters */}
+                    {/* Liquid Pills Categories */}
                     <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.2rem', scrollbarWidth: 'none' }}>
                         {categories.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setCategory(cat)}
                                 style={{
-                                    padding: '0.75rem 1.5rem', borderRadius: '1rem',
-                                    background: category === cat ? 'var(--primary-gradient)' : 'rgba(255,255,255,0.03)',
+                                    padding: '0.75rem 1.5rem', borderRadius: '50px', position: 'relative', overflow: 'hidden',
+                                    background: category === cat ? 'var(--primary-gradient)' : 'transparent',
                                     color: category === cat ? 'white' : 'var(--text-secondary)',
-                                    fontWeight: category === cat ? 600 : 500,
-                                    border: '1px solid ' + (category === cat ? 'transparent' : 'rgba(255,255,255,0.05)'),
+                                    fontWeight: category === cat ? 700 : 500,
+                                    border: category === cat ? 'none' : '1px solid rgba(255,255,255,0.1)',
                                     whiteSpace: 'nowrap', cursor: 'pointer', transition: 'all 0.3s ease',
-                                    boxShadow: category === cat ? '0 4px 10px rgba(139, 92, 246, 0.3)' : 'none'
+                                    boxShadow: category === cat ? '0 4px 15px rgba(139, 92, 246, 0.4)' : 'none'
                                 }}
                             >
-                                {cat}
+                                <span style={{ position: 'relative', zIndex: 2 }}>{cat}</span>
+                                {category === cat && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent)', zIndex: 1 }} />}
                             </button>
                         ))}
                     </div>
@@ -198,13 +203,11 @@ const Menu = () => {
                     {isAdmin && (
                         <button
                             onClick={() => setIsAddModalOpen(true)}
+                            className="btn-secondary"
                             style={{
-                                padding: '0.75rem 1.5rem', borderRadius: '1rem',
-                                background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.1)',
-                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                fontWeight: 600, transition: 'all 0.2s', marginLeft: 'auto'
+                                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                fontWeight: 600, marginLeft: 'auto'
                             }}
-                            className="hover:bg-white/20"
                         >
                             <Plus size={18} /> Add Item
                         </button>
@@ -230,31 +233,44 @@ const Menu = () => {
                 </div>
             </div>
 
-            {/* Grid */}
+            {/* Grid with Staggered Animation */}
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
-                    <div className="animate-spin" style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 1rem' }} />
-                    <p>Loading your favorites...</p>
+                <div style={{ textAlign: 'center', padding: '6rem', color: 'var(--text-secondary)' }}>
+                    <div className="animate-spin" style={{ width: '50px', height: '50px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 1.5rem' }} />
+                    <p style={{ fontSize: '1.1rem' }}>Brewing your menu...</p>
                 </div>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-                    {filteredProducts.map((p) => (
-                        <div key={p._id} className="glass card" style={{
-                            padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%',
-                            border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(30, 41, 59, 0.4)'
-                        }}>
+                    {filteredProducts.map((p, index) => (
+                        <div
+                            key={p._id}
+                            className="glass card animate-slide-up"
+                            style={{
+                                padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%',
+                                border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(30, 41, 59, 0.4)',
+                                animationDelay: `${index * 50}ms`, // Stagger effect
+                                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                            }}
+                        >
                             {/* Image Area */}
                             <div style={{ height: '220px', width: '100%', position: 'relative', overflow: 'hidden' }}>
                                 <img
                                     src={getImage(p)}
                                     alt={p.name}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
-                                    onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                                    style={{
+                                        width: '100%', height: '100%', objectFit: 'cover',
+                                        transition: 'transform 0.7s ease'
+                                    }}
+                                    onMouseOver={e => e.currentTarget.style.transform = 'scale(1.15)'}
                                     onMouseOut={e => e.currentTarget.style.transform = 'scale(1.0)'}
                                 />
-                                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, transparent 60%)' }} />
+                                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, transparent 50%)' }} />
+
+                                {p.category === 'Hot Coffee' && <div style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', padding: '0.3rem 0.8rem', borderRadius: '2rem', fontSize: '0.8rem', fontWeight: 600, border: '1px solid rgba(239, 68, 68, 0.3)', backdropFilter: 'blur(4px)' }}>Hot</div>}
+                                {p.category === 'Cold Coffee' && <div style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(59, 130, 246, 0.2)', color: '#93c5fd', padding: '0.3rem 0.8rem', borderRadius: '2rem', fontSize: '0.8rem', fontWeight: 600, border: '1px solid rgba(59, 130, 246, 0.3)', backdropFilter: 'blur(4px)' }}>Cold</div>}
+
                                 <div style={{ position: 'absolute', bottom: '1.25rem', left: '1.25rem', right: '1.25rem' }}>
-                                    <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 700, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>{p.name}</h3>
+                                    <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>{p.name}</h3>
                                     <p style={{ margin: '0.25rem 0 0', color: '#94a3b8', fontSize: '0.9rem' }}>{p.category}</p>
                                 </div>
                             </div>
@@ -287,7 +303,7 @@ const Menu = () => {
                                 ) : (
                                     <>
                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                            <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Price</span>
+                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Price</span>
                                             <span style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white' }}>₹{p.price}</span>
                                         </div>
 
@@ -313,11 +329,11 @@ const Menu = () => {
                                         {!isAdmin && (
                                             <button
                                                 onClick={() => addToCart(p)}
-                                                className="btn-primary" // Use global class
+                                                className="btn-primary"
                                                 style={{
-                                                    borderRadius: '2rem', padding: '0.6rem 1.25rem',
+                                                    borderRadius: '2rem', padding: '0.75rem 1.5rem',
                                                     display: 'flex', alignItems: 'center', gap: '0.5rem',
-                                                    fontSize: '0.95rem'
+                                                    fontSize: '0.95rem', boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)'
                                                 }}
                                             >
                                                 <Plus size={18} /> Add
